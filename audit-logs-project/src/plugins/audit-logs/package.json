@@ -1,0 +1,10 @@
+{
+  "name": "audit-logs",
+  "version": "0.0.1",
+  "description": "Strapi Audit Logs Plugin",
+  "strapi": {
+    "name": "audit-logs",
+    "displayName": "Audit Logs",
+    "kind": "plugin"
+  }
+}

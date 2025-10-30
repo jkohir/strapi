@@ -1,0 +1,74 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "timestamps": true,
+    "indexes": [
+      {
+        "name": "idx_audit_logs_action",
+        "type": "basic",
+        "attributes": [
+          "action"
+        ]
+      },
+      {
+        "name": "idx_audit_logs_content_type",
+        "type": "basic",
+        "attributes": [
+          "contentType"
+        ]
+      },
+      {
+        "name": "idx_audit_logs_user",
+        "type": "basic",
+        "attributes": [
+          "user"
+        ]
+      },
+      {
+        "name": "idx_audit_logs_timestamp",
+        "type": "basic",
+        "attributes": [
+          "timestamp"
+        ]
+      }
+    ]
+  },
+  "attributes": {
+    "contentType": {
+      "type": "string",
+      "required": true,
+      "description": "Name of the content type (e.g., 'api::article.article')"
+    },
+    "recordId": {
+      "type": "string",
+      "required": true,
+      "description": "ID of the record that was changed"
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": ["create", "update", "delete"],
+      "required": true
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "required": true
+    },
+    "payload": {
+      "type": "json",
+      "required": true,
+      "description": "JSON payload: diff for update, full record for create/delete"
+    }
+  }
+}
