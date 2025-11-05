@@ -1,7 +1,9 @@
-module.exports = {
+const config = {
   default: {
     enabled: true, // Globally enabled by default
     excludeContentTypes: [], // No exclusions by default
   },
   validator() {}, // No custom validator needed for this example
 };
+
+export default config;
