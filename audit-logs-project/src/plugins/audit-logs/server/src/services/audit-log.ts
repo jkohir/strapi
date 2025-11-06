@@ -1,8 +1,9 @@
 import type { Core } from '@strapi/strapi';
-import type { Params } from '@strapi/database/dist/entity-manager/types';
+import type { Query } from '@strapi/utils/dist/convert-query-params';
+
 
 // 1. Define the types for the data types
-export type AuditLogPayload = {
+export interface AuditLogPayload {
   contentType: string;
   action: 'create' | 'update' | 'delete';
   recordId: number;
@@ -52,18 +53,15 @@ const auditLogService = ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Fetches a list of audit logs, applying filtering, sorting, and pagination.
    */
-  async find(params: Params) {
-    // The entityService can directly consume the cleaned-up query parameters
-
-    const logs = await strapi.query('plugin::audit-logs.audit-log').findMany({
-      filters: params.filters,
-      orderBy: params.orderBy,
-      page: params.page,
-      pageSize: params.pageSize,
-      // Populate the user field for display
-      populate: { user: true }, 
-    });
-
+  async find(query: Query) {
+    console.log('[AUDIT-LOGS] Service incoming find query:', query);
+    query.populate = {
+      user: {
+        select: ['id', 'username', 'email'],
+      },
+    };
+    console.log('[AUDIT-LOGS] Service Final built query:', query);
+    const logs = await strapi.db.query('plugin::audit-logs.audit-log').findMany(query);
     return logs;
   },
 });

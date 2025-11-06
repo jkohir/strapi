@@ -40,6 +40,7 @@ This plugin provides a traceable history of CRUD operations for compliance, debu
 - Plugin instead of middleware for deeper integration and data persistence.
 - Manual permission registration avoids race condition but adds setup overhead.
 - Lifecycle hooks provide consistent change tracking but add minimal runtime overhead.
+- Used strapi structured api request format instead of a simple, flat api request format. So that it's consistent with every other Strapi API, and we can utilze Strapi's built in query parser and other such tools. This does make the request more verbose but also allows more complex queries like filtering by both create and update actions.
 
 ## Future Enhancements
 - Admin UI page for audit log browsing.

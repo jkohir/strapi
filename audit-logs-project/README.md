@@ -46,14 +46,13 @@ audit-logs-project > await strapi.db.query('plugin::users-permissions.permission
 ```
 - Call endpoint:
 ```
-  GET /api/audit-logs?contentType=api::article.article&action=update&page=1&pageSize=20&sort=timestamp:desc
+  GET /api/audit-logs?filters[action][$in]=update&filters[action][$in]=create&filters[contentType][$eq]=api::article.article&filters[timestamp][$gte]=2025-10-01&filters[timestamp][$lte]=2025-11-05&pagination[page]=1&pagination[pageSize]=20&sort=timestamp:desc
 ```
 
 - Sample request (authenticated user with read_audit_logs permission):
 ```
   GET http://localhost:1337/api/audit-logs
   Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzYyMjI0OTgyLCJleHAiOjE3NjQ4MTY5ODJ9.t04Lu7QQHUK96qxPnrOBUqyO7oq9fQcvCIutJS9FP3I
-
 ```
 
   - Sample response:

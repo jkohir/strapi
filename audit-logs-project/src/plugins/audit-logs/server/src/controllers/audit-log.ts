@@ -1,73 +1,35 @@
 import type { Core } from '@strapi/strapi';
 import { Context } from 'koa';
+import { queryParams } from '@strapi/utils';
 
-// Define a simple interface for the query structure we expect
-interface AuditQuery {
-  pagination?: {
-    page?: number;
-    pageSize?: number;
-  };
-  sort?: string;
-  _limit?: number;
-  _start?: number;
-  limit?: number;
-  start?: number;
-  filters?: {
-    contentType?: string;
-    userId?: number;
-    action?: 'create' | 'update' | 'delete';
-    fromDate?: string;
-    toDate?: string;
-    [key: string]: any; // Allow other filter properties
-  };
-  [key: string]: any; // Allow other top-level query properties
-}
+const transformer = queryParams.createTransformer({
+  getModel: (uid) => strapi.getModel(uid as any),
+});
 
 // Use the standard factory pattern for controllers
 const auditLogController = ({ strapi }: { strapi: Core.Strapi }) => ({
   async find(ctx: Context) {
-    console.log('[AUDIT-LOGS] Controller hit');
+    console.log('[AUDIT-LOGS] Controller hit, query object:', ctx.query);
 
-    const { query } = ctx as AuditQuery;
+    const query = transformer.transformQueryParams(
+      'plugin::audit-logs.audit-log',
+      ctx.query
+    );
 
-    // --- 1. Set Default Pagination and Sorting ---
-    const defaultQuery = {
-      pagination: {
-        page: query.pagination?.page || 1, 
-        pageSize: query.pagination?.pageSize || 5,
-      },
-      sort: query.sort || 'timestamp:desc', 
-    };
-    
-    // --- 2. Build Filters (from query.filters) ---
-    const filters: any = {};
-    if (query.filters) {
-      if (query.filters.contentType) {
-        filters.contentType = query.filters.contentType;
-      }
-      if (query.filters.action) {
-        filters.action = query.filters.action;
-      }
-      // Add date range filter logic
-      if (query.filters.fromDate || query.filters.toDate) {
-        filters.timestamp = {}; 
-        if (query.filters.fromDate) {
-          filters.timestamp.$gte = new Date(query.filters.fromDate as string);
-        }
-        if (query.filters.toDate) {
-          filters.timestamp.$lte = new Date(query.filters.toDate as string);
-        }
-      }
+    //Apply defaults
+    query.page = query.page ?? 1;
+    query.pageSize = query.pageSize ?? 20;
+    if (!Array.isArray(query.orderBy) || query.orderBy.length === 0) {
+      query.orderBy = [{ timestamp: 'desc' }];
     }
 
-    // --- 3. Execute Query ---
-    const logs = await strapi.service('plugin::audit-logs.auditLogService').find(
-      {
-        ...query,
-        ...defaultQuery,
-        filters,
-      }
-    );
+    // Optional: ensure we don’t override filters accidentally
+    query.where = query.where ?? {};
+
+    console.log('[AUDIT-LOGS] Final params sent to service:', query);
+
+    // --- Call Service ---
+    const logs = await strapi.service('plugin::audit-logs.auditLogService').find(query);
 
     // Manual transformation/response structure (if not using core controller factory)
     // If you were using createCoreController, you'd use this.transformResponse(logs)
